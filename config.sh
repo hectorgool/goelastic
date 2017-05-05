@@ -1,0 +1,3 @@
+export ELASTICSEARCH_HOSTS=http://172.17.0.4:9200
+export ELASTICSEARCH_INDEX=mx
+export ELASTICSEARCH_TYPE=postal_code
