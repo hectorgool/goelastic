@@ -1,12 +1,14 @@
 /*
+go fmt .
 go build
 go run -v main.go
+./goelastic
 */
 package main
 
 import (
 	"fmt"
-	"github.com/hectorgool/gomicrosearch2/elasticsearch"
+	"github.com/hectorgool/goelastic/elasticsearch"
 )
 
 func main() {

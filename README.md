@@ -1,4 +1,4 @@
-# ElasticSearch.js Microservice
+# ElasticSearch Microservice
 
 ### To format the code:
 

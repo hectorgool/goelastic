@@ -128,8 +128,7 @@ func CreateDocument(id string, document Document) (string, error) {
 
 func UpdateDocument(id string, document Document) (string, error) {
 
-	// Update a tweet by the update API of Elasticsearch.
-	// We just increment the number of retweets.
+	// Update a document by the update API of Elasticsearch.
 	update, err := client.Update().
 		Index(os.Getenv("ELASTICSEARCH_INDEX")).
 		Type(os.Getenv("ELASTICSEARCH_TYPE")).
@@ -142,18 +141,18 @@ func UpdateDocument(id string, document Document) (string, error) {
 		// Handle error
 		panic(err)
 	}
-	msg := fmt.Sprintf("New version of tweet %q is now %d", update.Id, update.Version)
+	msg := fmt.Sprintf("New version of document %q is now %d", update.Id, update.Version)
 	return msg, nil
 
 }
 
 func DeleteDocument(id string) (string, error) {
 
-	// Delete tweet with specified ID
+	// Delete document with specified ID
 	res, err := client.Delete().
-		Index("twitter").
-		Type("tweet").
-		Id("1").
+		Index(os.Getenv("ELASTICSEARCH_INDEX")).
+		Type(os.Getenv("ELASTICSEARCH_TYPE")).
+		Id(id).
 		Do()
 	if err != nil {
 		// Handle error
