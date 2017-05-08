@@ -11,13 +11,13 @@ package elasticsearch
 
 import (
 	"encoding/json"
-  "errors"
-  "gopkg.in/olivere/elastic.v3"
+	"errors"
+	"fmt"
 	j "github.com/ricardolonga/jsongo"
+	"gopkg.in/olivere/elastic.v3"
 	"log"
 	"os"
-  "reflect"
-	"fmt"
+	"reflect"
 )
 
 var client *elastic.Client
@@ -25,7 +25,7 @@ var client *elastic.Client
 func init() {
 
 	var err error
-  // Create a client
+	// Create a client
 	client, err = elastic.NewClient(elastic.SetURL(os.Getenv("ELASTICSEARCH_ENTRYPOINT")))
 	if err != nil {
 		panic(err)
@@ -36,25 +36,25 @@ func init() {
 func termToJson(term string) (j.O, error) {
 
 	if len(term) == 0 {
-    return nil, errors.New("No string supplied")
-  }
+		return nil, errors.New("No string supplied")
+	}
 
 	//create json object with the string term
-  //searchJson has jsongo.O type
-  searchJson := j.Object().
-  		Put("size", 10).
-  		Put("query", j.Object().
-  			Put("match", j.Object().
-  				Put("_all", j.Object().
-  					Put("query", term).
-  					Put("operator", "and")))).
-  		Put("sort", j.Array().
-  			Put(j.Object().
-  				Put("colonia", j.Object().
-  					Put("order", "asc").
-  					Put("mode", "avg"))))
-  log.Println(searchJson.Indent())
-  log.Println(reflect.TypeOf(searchJson))
+	//searchJson has jsongo.O type
+	searchJson := j.Object().
+		Put("size", 10).
+		Put("query", j.Object().
+			Put("match", j.Object().
+				Put("_all", j.Object().
+					Put("query", term).
+					Put("operator", "and")))).
+		Put("sort", j.Array().
+			Put(j.Object().
+				Put("colonia", j.Object().
+					Put("order", "asc").
+					Put("mode", "avg"))))
+	log.Println(searchJson.Indent())
+	log.Println(reflect.TypeOf(searchJson))
 
 	return searchJson, nil
 
@@ -62,9 +62,9 @@ func termToJson(term string) (j.O, error) {
 
 func SearchTerm(term string) (string, error) {
 
-  if len(term) == 0 {
-    return "", errors.New("No string supplied")
-  }
+	if len(term) == 0 {
+		return "", errors.New("No string supplied")
+	}
 
 	//Convert string to json query for elasticsearch
 	searchJson, err := termToJson(term)
@@ -72,7 +72,7 @@ func SearchTerm(term string) (string, error) {
 		panic(err)
 	}
 
-  // Search with a term source
+	// Search with a term source
 	searchResult, err := client.Search().
 		Index(os.Getenv("ELASTICSEARCH_INDEX")).
 		Type(os.Getenv("ELASTICSEARCH_TYPE")).
@@ -86,22 +86,22 @@ func SearchTerm(term string) (string, error) {
 
 	for _, hit := range searchResult.Hits.Hits {
 		var d Document
-    //parses *hit.Source into the instance of the Document struct
+		//parses *hit.Source into the instance of the Document struct
 		err := json.Unmarshal(*hit.Source, &d)
 		if err != nil {
 			log.Fatal(err)
 		}
-    //Puts d into a map for later access
+		//Puts d into a map for later access
 		documents = append(documents, d)
 	}
 
-  //Convert documents data to json
+	//Convert documents data to json
 	jsonDocuments, err := json.Marshal(documents)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-  //return jsonDocuments in json format
+	//return jsonDocuments in json format
 	return string(jsonDocuments), nil
 
 }
@@ -111,15 +111,15 @@ func CreateDocument(id string, document Document) (string, error) {
 	// Add a document to the index
 	var err error
 	_, err = client.Index().
-	    Index(os.Getenv("ELASTICSEARCH_INDEX")).
-	    Type(os.Getenv("ELASTICSEARCH_TYPE")).
-	    Id(id).
-	    BodyJson(document).
-	    Refresh(true).
-	    Do()
+		Index(os.Getenv("ELASTICSEARCH_INDEX")).
+		Type(os.Getenv("ELASTICSEARCH_TYPE")).
+		Id(id).
+		BodyJson(document).
+		Refresh(true).
+		Do()
 	if err != nil {
-	    // Handle error
-	    panic(err)
+		// Handle error
+		panic(err)
 	}
 	msg := fmt.Sprintf("The document: %s, has been save", id)
 	return msg, nil
@@ -135,12 +135,12 @@ func UpdateDocument(id string, document Document) (string, error) {
 		Type(os.Getenv("ELASTICSEARCH_TYPE")).
 		Id(id).
 		//Script("ctx._source.retweets += num").
-	  //ScriptParams(map[string]interface{}{"num": 1}).
-	  //Upsert(map[string]interface{}{"retweets": 0}).
-	  Do()
+		//ScriptParams(map[string]interface{}{"num": 1}).
+		//Upsert(map[string]interface{}{"retweets": 0}).
+		Do()
 	if err != nil {
-	    // Handle error
-	    panic(err)
+		// Handle error
+		panic(err)
 	}
 	msg := fmt.Sprintf("New version of tweet %q is now %d", update.Id, update.Version)
 	return msg, nil
@@ -151,16 +151,16 @@ func DeleteDocument(id string) (string, error) {
 
 	// Delete tweet with specified ID
 	res, err := client.Delete().
-	    Index("twitter").
-	    Type("tweet").
-	    Id("1").
-	    Do()
+		Index("twitter").
+		Type("tweet").
+		Id("1").
+		Do()
 	if err != nil {
-	    // Handle error
-	    panic(err)
+		// Handle error
+		panic(err)
 	}
 	//if res.Found {
-	return fmt.Sprintf("Document: %s, deleted from from index\n",res.Found ), nil
+	return fmt.Sprintf("Document: %s, deleted from from index\n", res.Found), nil
 	//}
 
 }
@@ -169,8 +169,8 @@ func Ping() (string, error) {
 
 	info, code, err := client.Ping(os.Getenv("ELASTICSEARCH_ENTRYPOINT")).Do()
 	if err != nil {
-	    // Handle error
-	    panic(err)
+		// Handle error
+		panic(err)
 	}
 	msg := fmt.Sprintf("Elasticsearch returned with code %d and version %s", code, info.Version.Number)
 	return msg, nil
