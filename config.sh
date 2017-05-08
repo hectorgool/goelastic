@@ -1,3 +1,8 @@
-export ELASTICSEARCH_HOSTS=http://172.17.0.4:9200
+export ELASTICSEARCH_HOSTS=`docker inspect --format '{{ .NetworkSettings.IPAddress }}' elasticsearch`
+export ELASTICSEARCH_PORT=9200
 export ELASTICSEARCH_INDEX=mx
 export ELASTICSEARCH_TYPE=postal_code
+
+export ELASTICSEARCH_ENTRYPOINT=http://$ELASTICSEARCH_HOSTS:$ELASTICSEARCH_PORT
+
+echo $ELASTICSEARCH_ENTRYPOINT
