@@ -82,21 +82,21 @@ func SearchTerm(term string) (string, error) {
 		panic(err)
 	}
 
-	var documents []Document
+	var Documents []*Document
 
 	for _, hit := range searchResult.Hits.Hits {
-		var d Document
+		d := &Document{}
 		//parses *hit.Source into the instance of the Document struct
 		err := json.Unmarshal(*hit.Source, &d)
 		if err != nil {
 			log.Fatal(err)
 		}
 		//Puts d into a map for later access
-		documents = append(documents, d)
+		Documents = append(Documents, d)
 	}
 
 	//Convert documents data to json
-	jsonDocuments, err := json.Marshal(documents)
+	jsonDocuments, err := json.Marshal(Documents)
 	if err != nil {
 		log.Fatal(err)
 	}
