@@ -164,6 +164,24 @@ func DeleteDocument(id string) (string, error) {
 
 }
 
+func GetDocument(id string) (string, error) {
+
+	// Get document with specified ID
+	get1, err := client.Get().
+		Index(os.Getenv("ELASTICSEARCH_INDEX")).
+		Type(os.Getenv("ELASTICSEARCH_TYPE")).
+	  Id(id).
+	 	Do()
+	if err != nil {
+	    // Handle error
+	    panic(err)
+	}
+	//if get1.Found {
+	return fmt.Sprintf("Got document %s in version %d from index %s, type %s\n", get1.Id, get1.Version, get1.Index, get1.Type), nil
+	//}
+
+}
+
 func Ping() (string, error) {
 
 	info, code, err := client.Ping(os.Getenv("ELASTICSEARCH_ENTRYPOINT")).Do()
